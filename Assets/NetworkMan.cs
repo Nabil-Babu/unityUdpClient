@@ -14,7 +14,7 @@ public class NetworkMan : MonoBehaviour
     {
         udp = new UdpClient();
         
-        udp.Connect("localhost",12345);
+        udp.Connect("23.22.122.54",12345);
 
         Byte[] sendBytes = Encoding.ASCII.GetBytes("connect");
       
@@ -55,7 +55,7 @@ public class NetworkMan : MonoBehaviour
 
     [Serializable]
     public class NewPlayer{
-        
+        public Player player;
     }
 
     [Serializable]
@@ -67,6 +67,7 @@ public class NetworkMan : MonoBehaviour
     public GameState lastestGameState;
     public List<GameObject> allPlayers = new List<GameObject>(); 
     public GameObject playerObject;
+    public NewPlayer newPlayer; 
     void OnReceived(IAsyncResult result){
         // this is what had been passed into BeginReceive as the second parameter:
         UdpClient socket = result.AsyncState as UdpClient;
@@ -110,10 +111,22 @@ public class NetworkMan : MonoBehaviour
         {
             foreach (Player player in lastestGameState.players)
             {
-                GameObject nPlayer = Instantiate(playerObject, new Vector3(0, 0, 0), Quaternion.identity);
-                nPlayer.GetComponent<PlayerID>().ID = player.id;
-                nPlayer.GetComponent<Renderer>().material.color = new Color(player.color.R, player.color.G, player.color.B);
-                allPlayers.Add(nPlayer);
+                bool spawnPlayer = true; 
+                foreach(GameObject inGamePlayer in allPlayers)
+                {
+                    if(player.id == inGamePlayer.GetComponent<PlayerID>().ID)
+                    {
+                        spawnPlayer = false;
+                    }
+                }
+
+                if(spawnPlayer)
+                {
+                    GameObject nPlayer = Instantiate(playerObject, new Vector3(UnityEngine.Random.Range(-10,10), 0, 0), Quaternion.identity);
+                    nPlayer.GetComponent<PlayerID>().ID = player.id;
+                    nPlayer.GetComponent<Renderer>().material.color = new Color(player.color.R, player.color.G, player.color.B);
+                    allPlayers.Add(nPlayer);
+                }
             }
         }
     }
@@ -132,7 +145,23 @@ public class NetworkMan : MonoBehaviour
     }
 
     void DestroyPlayers(){
-        
+        foreach (GameObject inGamePlayer in allPlayers)
+        {
+            bool destroyPlayer = true; 
+            foreach (Player serverPlayer in lastestGameState.players)
+            {
+                if(serverPlayer.id == inGamePlayer.GetComponent<PlayerID>().ID)
+                {
+                   destroyPlayer = false;
+                }
+            }
+            if(destroyPlayer)
+            {
+                Destroy(inGamePlayer);
+                allPlayers.Remove(inGamePlayer);
+                allPlayers.TrimExcess();
+            }
+        }
     }
     
     void HeartBeat(){
