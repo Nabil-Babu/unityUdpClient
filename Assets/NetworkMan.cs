@@ -14,7 +14,7 @@ public class NetworkMan : MonoBehaviour
     {
         udp = new UdpClient();
         
-        udp.Connect("PUT_IP_ADDRESS_HERE",12345);
+        udp.Connect("localhost",12345);
 
         Byte[] sendBytes = Encoding.ASCII.GetBytes("connect");
       
@@ -32,7 +32,8 @@ public class NetworkMan : MonoBehaviour
 
     public enum commands{
         NEW_CLIENT,
-        UPDATE
+        UPDATE,
+        DELETE
     };
     
     [Serializable]
@@ -64,6 +65,8 @@ public class NetworkMan : MonoBehaviour
 
     public Message latestMessage;
     public GameState lastestGameState;
+    public List<GameObject> allPlayers = new List<GameObject>(); 
+    public GameObject playerObject;
     void OnReceived(IAsyncResult result){
         // this is what had been passed into BeginReceive as the second parameter:
         UdpClient socket = result.AsyncState as UdpClient;
@@ -86,6 +89,9 @@ public class NetworkMan : MonoBehaviour
                 case commands.UPDATE:
                     lastestGameState = JsonUtility.FromJson<GameState>(returnData);
                     break;
+                case commands.DELETE:
+                    Debug.Log("Player has Dropped");
+                    break;
                 default:
                     Debug.Log("Error");
                     break;
@@ -100,15 +106,33 @@ public class NetworkMan : MonoBehaviour
     }
 
     void SpawnPlayers(){
-
+        if(lastestGameState.players.Length > allPlayers.Count)
+        {
+            foreach (Player player in lastestGameState.players)
+            {
+                GameObject nPlayer = Instantiate(playerObject, new Vector3(0, 0, 0), Quaternion.identity);
+                nPlayer.GetComponent<PlayerID>().ID = player.id;
+                nPlayer.GetComponent<Renderer>().material.color = new Color(player.color.R, player.color.G, player.color.B);
+                allPlayers.Add(nPlayer);
+            }
+        }
     }
 
     void UpdatePlayers(){
-
+        foreach (GameObject player in allPlayers)
+        {
+            foreach (Player serverPlayer in lastestGameState.players)
+            {
+                if(serverPlayer.id == player.GetComponent<PlayerID>().ID)
+                {
+                    player.GetComponent<Renderer>().material.color = new Color(serverPlayer.color.R, serverPlayer.color.G, serverPlayer.color.B);
+                }
+            }
+        }
     }
 
     void DestroyPlayers(){
-
+        
     }
     
     void HeartBeat(){
