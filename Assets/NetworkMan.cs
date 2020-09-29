@@ -9,13 +9,21 @@ using System.Net;
 public class NetworkMan : MonoBehaviour
 {
     public UdpClient udp;
-    // Start is called before the first frame update
+    public bool localhostTesting = false; 
+    private string myServerIP = "23.22.122.54";
+    private string localHost = "localhost";
     void Start()
     {
         udp = new UdpClient();
-        
-        udp.Connect("23.22.122.54",12345);
-
+        if(localhostTesting)
+        {
+            udp.Connect(localHost,12345);
+        }
+        else 
+        {
+            udp.Connect(myServerIP,12345);
+        }
+            
         Byte[] sendBytes = Encoding.ASCII.GetBytes("connect");
       
         udp.Send(sendBytes, sendBytes.Length);
@@ -26,6 +34,7 @@ public class NetworkMan : MonoBehaviour
     }
 
     void OnDestroy(){
+        udp.Close();
         udp.Dispose();
     }
 
@@ -42,9 +51,11 @@ public class NetworkMan : MonoBehaviour
     }
     
     [Serializable]
-    public class Player{
+    public class Player
+    {
         [Serializable]
-        public struct receivedColor{
+        public struct receivedColor
+        {
             public float R;
             public float G;
             public float B;
@@ -52,6 +63,14 @@ public class NetworkMan : MonoBehaviour
         public string id;
         public receivedColor color;        
     }
+
+    [Serializable]
+    public class ServerClient
+    {
+        public DateTime lastBeat = new DateTime();
+        public float color;
+    }
+
 
     [Serializable]
     public class NewPlayer{
@@ -62,13 +81,19 @@ public class NetworkMan : MonoBehaviour
     public class GameState{
         public Player[] players;
     }
+    [Serializable]
+    public class ServerState{
+        public ServerClient[] clients;
+    }
 
     public Message latestMessage;
     public GameState lastestGameState;
+    public ServerState latestServerState;
     public List<GameObject> allPlayers = new List<GameObject>(); 
     public GameObject playerObject;
     public NewPlayer newPlayer; 
-    void OnReceived(IAsyncResult result){
+    void OnReceived(IAsyncResult result)
+    {
         // this is what had been passed into BeginReceive as the second parameter:
         UdpClient socket = result.AsyncState as UdpClient;
         
@@ -83,9 +108,12 @@ public class NetworkMan : MonoBehaviour
         Debug.Log("Got this: " + returnData);
         
         latestMessage = JsonUtility.FromJson<Message>(returnData);
-        try{
-            switch(latestMessage.cmd){
+        try
+        {
+            switch(latestMessage.cmd)
+            {
                 case commands.NEW_CLIENT:
+                    latestServerState = JsonUtility.FromJson<ServerState>(returnData);
                     break;
                 case commands.UPDATE:
                     lastestGameState = JsonUtility.FromJson<GameState>(returnData);
@@ -98,7 +126,8 @@ public class NetworkMan : MonoBehaviour
                     break;
             }
         }
-        catch (Exception e){
+        catch (Exception e)
+        {
             Debug.Log(e.ToString());
         }
         
@@ -106,7 +135,8 @@ public class NetworkMan : MonoBehaviour
         socket.BeginReceive(new AsyncCallback(OnReceived), socket);
     }
 
-    void SpawnPlayers(){
+    void SpawnPlayers()
+    {
         if(lastestGameState.players.Length > allPlayers.Count)
         {
             foreach (Player player in lastestGameState.players)
@@ -131,7 +161,8 @@ public class NetworkMan : MonoBehaviour
         }
     }
 
-    void UpdatePlayers(){
+    void UpdatePlayers()
+    {
         foreach (GameObject player in allPlayers)
         {
             foreach (Player serverPlayer in lastestGameState.players)
@@ -144,7 +175,8 @@ public class NetworkMan : MonoBehaviour
         }
     }
 
-    void DestroyPlayers(){
+    void DestroyPlayers()
+    {
         foreach (GameObject inGamePlayer in allPlayers)
         {
             bool destroyPlayer = true; 
@@ -164,12 +196,14 @@ public class NetworkMan : MonoBehaviour
         }
     }
     
-    void HeartBeat(){
+    void HeartBeat()
+    {
         Byte[] sendBytes = Encoding.ASCII.GetBytes("heartbeat");
         udp.Send(sendBytes, sendBytes.Length);
     }
 
-    void Update(){
+    void Update()
+    {
         SpawnPlayers();
         UpdatePlayers();
         DestroyPlayers();

@@ -258,10 +258,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1ad586668d834644b8076c3e4f8466f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  localhostTesting: 1
   latestMessage:
     cmd: 0
   lastestGameState:
     players: []
+  latestServerState:
+    clients: []
   allPlayers: []
   playerObject: {fileID: 8789674846601985004, guid: 1bb0fb0fdabbe04409538ffd3327fcc9,
     type: 3}
