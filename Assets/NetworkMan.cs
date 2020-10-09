@@ -35,7 +35,7 @@ public class NetworkMan : MonoBehaviour
         // All this is explained in Week 1-4 slides
         udp = new UdpClient();
         Debug.Log("Connecting...");
-        udp.Connect("localhost",12345);
+        udp.Connect("23.22.122.54",12345);
         Byte[] sendBytes = Encoding.ASCII.GetBytes("connect");
         udp.Send(sendBytes, sendBytes.Length);
         udp.BeginReceive(new AsyncCallback(OnReceived), udp);
@@ -203,6 +203,10 @@ public class NetworkMan : MonoBehaviour
             foreach (NetworkMan.Player player in lastestGameState.players){
                 string playerID = player.id;
                 currentPlayers[player.id].GetComponent<Renderer>().material.color = new Color(player.color.R,player.color.G,player.color.B);
+                if(playerID != myAddress)
+                {
+                    currentPlayers[player.id].transform.position = new Vector3(player.position.X,player.position.Y, player.position.Z);
+                }
             }
             lastestGameState.players = new Player[0];
         }
@@ -230,8 +234,8 @@ public class NetworkMan : MonoBehaviour
             pos.Z = currentPlayers[myAddress].transform.position.z;
         }
     
-        string jsonMessage = JsonUtility.ToJson(pos);
-        Byte[] sendBytes = Encoding.ASCII.GetBytes(jsonMessage);
+
+        Byte[] sendBytes = Encoding.ASCII.GetBytes(JsonUtility.ToJson(pos));
         udp.Send(sendBytes, sendBytes.Length);
     }
 
