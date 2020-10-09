@@ -225,6 +225,7 @@ GameObject:
   m_Component:
   - component: {fileID: 775130657}
   - component: {fileID: 775130658}
+  - component: {fileID: 775130656}
   m_Layer: 0
   m_Name: NetworkMan
   m_TagString: Untagged
@@ -232,6 +233,18 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &775130656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775130655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76de87a3aed8d4a49bb67c078345a269, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &775130657
 Transform:
   m_ObjectHideFlags: 0
@@ -258,23 +271,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1ad586668d834644b8076c3e4f8466f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localhostTesting: 1
+  playerGO: {fileID: 8789674846601985004, guid: 1bb0fb0fdabbe04409538ffd3327fcc9,
+    type: 3}
+  myAddress: 
+  newPlayers: []
+  droppedPlayers: []
+  lastestGameState:
+    pktID: 0
+    players: []
+  initialSetofPlayers:
+    players: []
   latestMessage:
     cmd: 0
-  lastestGameState:
-    players: []
-  latestServerState:
-    clients: []
-  allPlayers: []
-  playerObject: {fileID: 8789674846601985004, guid: 1bb0fb0fdabbe04409538ffd3327fcc9,
-    type: 3}
-  newPlayer:
-    player:
-      id: 
-      color:
-        R: 0
-        G: 0
-        B: 0
 --- !u!850595691 &824320675
 LightingSettings:
   m_ObjectHideFlags: 0

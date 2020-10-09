@@ -22,7 +22,7 @@ public class NetworkMan : MonoBehaviour
     
     public MessageType latestMessage; // the last message received from the server
 
-
+    public currentPosition pos;
     // Start is called before the first frame update
     void Start()
     {
@@ -57,13 +57,22 @@ public class NetworkMan : MonoBehaviour
             public float B;
         }
 
+    [Serializable]
+        public struct currentPosition{
+            public float X;
+            public float Y;
+            public float Z;
+        }
+
+
     /// <summary>
     /// A structure that replicates our player dictionary on server
     /// </summary>
     [Serializable]
     public class Player{
         public string id;
-        public receivedColor color;        
+        public receivedColor color;
+        public currentPosition position;        
     }
 
 
@@ -212,7 +221,17 @@ public class NetworkMan : MonoBehaviour
     }
     
     void HeartBeat(){
-        Byte[] sendBytes = Encoding.ASCII.GetBytes("heartbeat");
+        
+        if(currentPlayers.ContainsKey(myAddress))
+        {
+            pos = new currentPosition();
+            pos.X = currentPlayers[myAddress].transform.position.x;
+            pos.Y = currentPlayers[myAddress].transform.position.y;
+            pos.Z = currentPlayers[myAddress].transform.position.z;
+        }
+    
+        string jsonMessage = JsonUtility.ToJson(pos);
+        Byte[] sendBytes = Encoding.ASCII.GetBytes(jsonMessage);
         udp.Send(sendBytes, sendBytes.Length);
     }
 
