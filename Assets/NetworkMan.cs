@@ -35,7 +35,7 @@ public class NetworkMan : MonoBehaviour
         // All this is explained in Week 1-4 slides
         udp = new UdpClient();
         Debug.Log("Connecting...");
-        udp.Connect("23.22.122.54",12345);
+        udp.Connect("localhost",12345);
         Byte[] sendBytes = Encoding.ASCII.GetBytes("connect");
         udp.Send(sendBytes, sendBytes.Length);
         udp.BeginReceive(new AsyncCallback(OnReceived), udp);
@@ -50,12 +50,12 @@ public class NetworkMan : MonoBehaviour
     /// <summary>
     /// A structure that replicates our server color dictionary
     /// </summary>
-    [Serializable]
-        public struct receivedColor{
-            public float R;
-            public float G;
-            public float B;
-        }
+    // [Serializable]
+    //     public struct receivedColor{
+    //         public float R;
+    //         public float G;
+    //         public float B;
+    //     }
 
     [Serializable]
         public struct currentPosition{
@@ -71,7 +71,7 @@ public class NetworkMan : MonoBehaviour
     [Serializable]
     public class Player{
         public string id;
-        public receivedColor color;
+        //public receivedColor color;
         public currentPosition position;        
     }
 
@@ -191,7 +191,7 @@ public class NetworkMan : MonoBehaviour
                 if (player.id == myAddress)
                     continue;
                 currentPlayers.Add(player.id, Instantiate(playerGO, new Vector3(0,0,0), Quaternion.identity));
-                currentPlayers[player.id].GetComponent<Renderer>().material.color = new Color(player.color.R, player.color.G, player.color.B);
+                //currentPlayers[player.id].GetComponent<Renderer>().material.color = new Color(player.color.R, player.color.G, player.color.B);
                 currentPlayers[player.id].name = player.id;
             }
             initialSetofPlayers.players = new Player[0];
@@ -202,7 +202,7 @@ public class NetworkMan : MonoBehaviour
         if (lastestGameState.players.Length >0){
             foreach (NetworkMan.Player player in lastestGameState.players){
                 string playerID = player.id;
-                currentPlayers[player.id].GetComponent<Renderer>().material.color = new Color(player.color.R,player.color.G,player.color.B);
+                //currentPlayers[player.id].GetComponent<Renderer>().material.color = new Color(player.color.R,player.color.G,player.color.B);
                 if(playerID != myAddress)
                 {
                     currentPlayers[player.id].transform.position = new Vector3(player.position.X,player.position.Y, player.position.Z);
